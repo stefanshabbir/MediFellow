@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
+    const type = searchParams.get('type') // Supabase adds 'type' param for invites
     // if "next" is in param, use it as the redirect URL
     const next = searchParams.get('next') ?? '/'
 
@@ -12,6 +13,11 @@ export async function GET(request: Request) {
         const supabase = await createClient()
         const { error } = await supabase.auth.exchangeCodeForSession(code)
         if (!error) {
+            // If this is an invite (type=invite or type=recovery), redirect to set password
+            if (type === 'invite' || type === 'recovery') {
+                return NextResponse.redirect(`${origin}/set-password`)
+            }
+
             const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
             const isLocalEnv = process.env.NODE_ENV === 'development'
             if (isLocalEnv) {
