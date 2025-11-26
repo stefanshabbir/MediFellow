@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LoginForm } from "./login-form";
+import { RegisterForm } from "./register-form";
 
 export const metadata: Metadata = {
-  title: "Sign in | MediFellow",
-  description: "Access your MediFellow account to manage appointments.",
+  title: "Sign up | MediFellow",
+  description: "Create your MediFellow account to manage appointments.",
 };
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <div className="w-full max-w-md">
@@ -19,7 +19,7 @@ export default function LoginPage() {
             MediFellow
           </Link>
         </div>
-        <LoginForm />
+        <RegisterForm />
         <p className="mt-6 text-center text-xs text-muted-foreground">
           By continuing, you agree to MediFellow's{" "}
           <Link href="/terms" className="font-medium text-primary underline-offset-4 hover:underline">
