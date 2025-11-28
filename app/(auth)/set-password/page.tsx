@@ -19,6 +19,12 @@ export default function SetPasswordPage() {
     useEffect(() => {
         const supabase = createClient()
 
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') {
+                setIsCheckingSession(false)
+            }
+        })
+
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession()
             if (session) {
@@ -27,12 +33,6 @@ export default function SetPasswordPage() {
         }
 
         checkSession()
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') {
-                setIsCheckingSession(false)
-            }
-        })
 
         return () => subscription.unsubscribe()
     }, [])

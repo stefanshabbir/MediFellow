@@ -12,6 +12,7 @@ import Link from "next/link"
 export default function BookAppointmentPage() {
     const router = useRouter()
     const [doctors, setDoctors] = useState<any[]>([])
+    const [selectedOrg, setSelectedOrg] = useState("")
     const [selectedDoctor, setSelectedDoctor] = useState("")
     const [selectedDate, setSelectedDate] = useState("")
     const [availableSlots, setAvailableSlots] = useState<any[]>([])
@@ -75,6 +76,16 @@ export default function BookAppointmentPage() {
 
     const minDate = new Date().toISOString().split('T')[0]
 
+    // Extract unique organisations from doctors list
+    const organisations = Array.from(new Set(doctors.map(d => JSON.stringify({ id: d.organisations?.id, name: d.organisations?.name }))))
+        .map(s => JSON.parse(s))
+        .filter(o => o.id && o.name)
+
+    // Filter doctors based on selected organisation
+    const filteredDoctors = selectedOrg
+        ? doctors.filter(d => d.organisations?.id === selectedOrg)
+        : []
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -98,6 +109,28 @@ export default function BookAppointmentPage() {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Clinic Selection */}
+                        <div className="space-y-2">
+                            <Label htmlFor="clinic">Select Clinic</Label>
+                            <select
+                                id="clinic"
+                                value={selectedOrg}
+                                onChange={(e) => {
+                                    setSelectedOrg(e.target.value)
+                                    setSelectedDoctor("") // Reset doctor when clinic changes
+                                }}
+                                className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                required
+                            >
+                                <option value="">Choose a clinic...</option>
+                                {organisations.map((org: any) => (
+                                    <option key={org.id} value={org.id}>
+                                        {org.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
                         {/* Doctor Selection */}
                         <div className="space-y-2">
                             <Label htmlFor="doctor">Select Doctor</Label>
@@ -107,11 +140,14 @@ export default function BookAppointmentPage() {
                                 onChange={(e) => setSelectedDoctor(e.target.value)}
                                 className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
                                 required
+                                disabled={!selectedOrg}
                             >
-                                <option value="">Choose a doctor...</option>
-                                {doctors.map((doctor) => (
+                                <option value="">
+                                    {!selectedOrg ? "Select a clinic first..." : "Choose a doctor..."}
+                                </option>
+                                {filteredDoctors.map((doctor) => (
                                     <option key={doctor.id} value={doctor.id}>
-                                        {doctor.full_name} - {doctor.organisations?.name}
+                                        {doctor.full_name}
                                     </option>
                                 ))}
                             </select>
